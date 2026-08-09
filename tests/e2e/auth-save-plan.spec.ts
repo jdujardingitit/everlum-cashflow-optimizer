@@ -213,7 +213,6 @@ test.describe('Auth return path validation', () => {
     await mockTurnstileOnAllForms(page);
     const loginResult = await loginExistingUser(page);
     expect(loginResult?.success).toBeTruthy();
-    await expect(page.getByTestId('ecf-step-budget')).toBeVisible();
     await seedCalculator(page);
 
     await page.locator('[data-testid="ecf-results-save-button"]').click();

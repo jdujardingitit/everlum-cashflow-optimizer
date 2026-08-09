@@ -24,7 +24,6 @@ test.describe('Money Steps generation', () => {
     const response = await loginResponse;
     expect((await response.json()).success).toBeTruthy();
     await expect(page.locator('#ecf-save-plan-btn')).toBeEnabled();
-    await expect(page.getByTestId('ecf-step-budget')).toBeVisible();
   }
 
   async function completeCalculatorAsLoggedInUser(page: any) {

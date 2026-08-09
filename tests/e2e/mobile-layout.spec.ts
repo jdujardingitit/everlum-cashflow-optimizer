@@ -72,7 +72,7 @@ test.describe('Mobile UI layout and interaction', () => {
       frequency: 'monthly',
     });
 
-    const helpIcon = page.locator('[data-velocity-help="velocityExpenseEligibility"]');
+    const helpIcon = page.locator('[data-velocity-help="velocityExpenseEligibility"]').first();
     await expect(helpIcon).toBeVisible();
     await helpIcon.click();
     await expect(page.locator('#ecf-velocity-help-modal')).toHaveClass(/is-open/);

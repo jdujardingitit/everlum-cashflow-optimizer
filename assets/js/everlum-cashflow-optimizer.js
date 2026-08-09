@@ -891,6 +891,7 @@
 
     function runCalculations(payload) {
         const summary = buildBaseSummary(payload);
+        payload.summary = summary;
         const strategies = [];
 
         if (payload.optimizer.minimum) {
