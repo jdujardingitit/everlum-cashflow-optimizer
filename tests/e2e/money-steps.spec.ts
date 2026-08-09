@@ -24,6 +24,8 @@ test.describe('Money Steps generation', () => {
     const response = await loginResponse;
     expect((await response.json()).success).toBeTruthy();
     await expect(page.locator('#ecf-save-plan-btn')).toBeEnabled();
+    await page.getByTestId('ecf-stepper-budget').click();
+    await expect(page.getByTestId('ecf-step-budget')).toBeVisible();
   }
 
   async function completeCalculatorAsLoggedInUser(page: any) {
@@ -129,6 +131,7 @@ test.describe('Money Steps generation', () => {
     await page.getByTestId('ecf-calc-button').click();
     await page.getByTestId('ecf-results-save-button').click();
     await page.getByTestId('ecf-save-money-steps-button').click();
+    await page.getByTestId('ecf-build-money-steps-btn').click();
 
     await expect(page.getByText('Create a free account to use Money Steps.')).toBeVisible();
     await assertNoErrors();

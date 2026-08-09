@@ -86,7 +86,7 @@ export function buildCalculatorUrl(extraParams: Record<string, string> = {}): st
 }
 
 export async function openCalculator(page: Page, extraParams: Record<string, string> = {}): Promise<void> {
-  await page.goto(buildCalculatorUrl(extraParams));
+  await page.goto(buildCalculatorUrl(extraParams), { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('ecf-cashflow-root')).toBeVisible();
 }
 

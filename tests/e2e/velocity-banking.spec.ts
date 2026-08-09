@@ -36,9 +36,6 @@ test.describe('Credit/LOC velocity behavior', () => {
     await page.locator('input[name="velocityTargetDebt"]').fill('Visa');
     await page.locator('input[name="velocityCardBalance"]').fill('3000');
     await page.locator('input[name="velocityCardLimit"]').fill('10000');
-    await page.locator('input[name="velocityStatementDate"]').fill('2026-08-15');
-    await page.locator('input[name="velocityCardDueDate"]').fill('2026-08-30');
-    await page.locator('input[name="velocityInterestChargeDate"]').fill('2026-09-05');
     await page.locator('select[name="velocityCreditToolType"]').selectOption('none');
 
     await page.getByTestId('ecf-calc-button').click();
@@ -46,7 +43,7 @@ test.describe('Credit/LOC velocity behavior', () => {
     await expect(page.getByTestId('ecf-results')).toBeVisible();
     await expect(page.getByRole('heading', { name: /Recommended strategy:/ })).toBeVisible();
     await expect(page.getByText('Estimated Credit Card Velocity Result')).toBeVisible();
-    await expect(page.getByText(/Generic Timing uses estimated/)).toBeVisible();
+    await expect(page.getByText(/Velocity Banking results are estimated using generic timing/)).toBeVisible();
     await expect(page.getByText('29% is an average estimate. Please enter your actual credit card APR for more accurate results.')).toBeVisible();
     await assertNoErrors();
   });
@@ -87,7 +84,7 @@ test.describe('Credit/LOC velocity behavior', () => {
     await page.getByTestId('ecf-calc-button').click();
 
     await expect(page.getByText('Custom Timing Velocity Estimate')).toBeVisible();
-    await expect(page.getByText(/full date-by-date simulation is still pending/)).toBeVisible();
+    await expect(page.getByTestId('ecf-result-table').getByText(/full date-by-date simulation is still pending/i)).toBeVisible();
     await assertNoErrors();
   });
 
@@ -140,7 +137,7 @@ test.describe('Credit/LOC velocity behavior', () => {
     await page.locator('input[name="velocityTargetDebt"]').fill('Credit Card');
 
     await page.getByTestId('ecf-calc-button').click();
-    await expect(page.getByText('Advanced LOC Velocity Estimate')).toBeVisible();
+    await expect(page.getByText('Advanced LOC Velocity Estimate', { exact: true })).toBeVisible();
     await assertNoErrors();
   });
 

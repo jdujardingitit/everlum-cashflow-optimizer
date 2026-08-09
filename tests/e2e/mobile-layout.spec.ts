@@ -52,9 +52,11 @@ test.describe('Mobile UI layout and interaction', () => {
     await assertNoErrors();
   });
 
-  test('Mobile landscape keeps interactive controls and book help modal available', async ({ page }, testInfo) => {
-    const assertNoErrors = attachGuards(page, testInfo);
-    await page.setViewportSize({ width: 844, height: 390 });
+  test.describe('landscape viewport', () => {
+    test.use({ viewport: { width: 844, height: 390 } });
+
+    test('Mobile landscape keeps interactive controls and book help modal available', async ({ page }, testInfo) => {
+      const assertNoErrors = attachGuards(page, testInfo);
 
     await openCalculator(page);
     await mockTurnstileOnAllForms(page);
@@ -91,6 +93,7 @@ test.describe('Mobile UI layout and interaction', () => {
     await page.getByTestId('ecf-step-debts-next').click();
     await page.getByTestId('ecf-calc-button').click();
     await expect(page.locator('#ecf-velocity-help-modal')).toHaveCount(1);
-    await assertNoErrors();
+      await assertNoErrors();
+    });
   });
 });
