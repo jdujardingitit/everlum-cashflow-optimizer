@@ -15,6 +15,7 @@ function normalizeBasePath(url: string): string {
 
 export default defineConfig({
   testDir: './tests/e2e',
+  workers: process.env.CI ? 1 : undefined,
   timeout: 120_000,
   expect: {
     timeout: 15_000,

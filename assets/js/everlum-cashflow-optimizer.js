@@ -257,29 +257,33 @@
     }
 
     function bindButtons() {
-        $('[data-next]', root).addEventListener('click', (event) => {
-            const explicitSource = event.currentTarget.getAttribute('data-auth-return');
-            if (explicitSource) {
-                setAuthReturnContext(explicitSource);
-            }
-            const nextIndex = state.currentStep + 1;
-            if (state.currentStep === 0 && nextIndex === 1) {
-                trackClarityEvent('budget_completed');
-            }
+        $$('[data-next]', root).forEach((button) => {
+            button.addEventListener('click', (event) => {
+                const explicitSource = event.currentTarget.getAttribute('data-auth-return');
+                if (explicitSource) {
+                    setAuthReturnContext(explicitSource);
+                }
+                const nextIndex = state.currentStep + 1;
+                if (state.currentStep === 0 && nextIndex === 1) {
+                    trackClarityEvent('budget_completed');
+                }
 
-            if (state.currentStep === 1 && nextIndex === 2) {
-                trackClarityEvent('debts_completed');
-            }
+                if (state.currentStep === 1 && nextIndex === 2) {
+                    trackClarityEvent('debts_completed');
+                }
 
-            const explicitEvent = event.currentTarget.getAttribute('data-clarity-event');
-            if (explicitEvent) {
-                trackClarityEvent(explicitEvent);
-            }
+                const explicitEvent = event.currentTarget.getAttribute('data-clarity-event');
+                if (explicitEvent) {
+                    trackClarityEvent(explicitEvent);
+                }
 
-            goToStep(nextIndex);
+                goToStep(nextIndex);
+            });
         });
-        $('[data-prev]', root).addEventListener('click', () => {
-            goToStep(state.currentStep - 1);
+        $$('[data-prev]', root).forEach((button) => {
+            button.addEventListener('click', () => {
+                goToStep(state.currentStep - 1);
+            });
         });
         root.addEventListener('click', (event) => {
             const trigger = event.target.closest('[data-clarity-event]');
@@ -2032,6 +2036,13 @@
                     if (action === 'everlum_cf_login' || action === 'everlum_cf_signup') {
                         trackClarityEvent(action === 'everlum_cf_login' ? 'login_signin' : 'account_created');
                         cfg.isLoggedIn = true;
+                        cfg.userId = Number(result.data.user_id || cfg.userId || 0);
+                        if (Object.prototype.hasOwnProperty.call(result.data, 'can_use_money_steps')) {
+                            cfg.canUseMoneySteps = Boolean(result.data.can_use_money_steps);
+                        }
+                        if (result.data.nonce) {
+                            cfg.nonce = result.data.nonce;
+                        }
                         configureSaveButton();
                         goToStep(getAuthReturnStep());
                     } else {

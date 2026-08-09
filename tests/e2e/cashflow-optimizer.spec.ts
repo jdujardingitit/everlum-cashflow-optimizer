@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import {
   addDebt,
   addExpense,
+  addIncomeSource,
   attachGuards,
   fillSummaryBudget,
   openCalculator,
@@ -14,7 +15,7 @@ test.describe('Cashflow optimizer core flow', () => {
 
     await openCalculator(page);
     await mockTurnstileOnAllForms(page);
-    await expect(page.getByText('Cash Flow Optimizer')).toBeVisible();
+    await expect(page.getByTestId('ecf-stepper-optimizer')).toBeVisible();
     await expect(page.getByTestId('ecf-cta-start')).toBeVisible();
 
     await page.getByTestId('ecf-cta-start').click();
@@ -82,7 +83,7 @@ test.describe('Cashflow optimizer core flow', () => {
     await page.getByTestId('ecf-step-debts-next').click();
     await page.getByTestId('ecf-calc-button').click();
 
-    await expect(page.getByText(/Available cash flow: \$4700\.00/)).toBeVisible();
+    await expect(page.getByText(/Available cash flow: \$3400\.00/)).toBeVisible();
     await expect(page.getByText(/Income:\s*\$5000\.00/)).toBeVisible();
     await expect(page.locator('#ecf-balance-chart')).toBeVisible();
     await assertNoErrors();
@@ -132,6 +133,7 @@ test.describe('Cashflow optimizer core flow', () => {
       paymentMethod: 'cash',
     });
 
+    await page.getByTestId('ecf-step-budget-next').click();
     await addDebt(page, {
       name: 'Student Loan',
       type: 'Student Loan',

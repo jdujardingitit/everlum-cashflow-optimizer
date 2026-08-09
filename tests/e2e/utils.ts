@@ -23,14 +23,26 @@ export const testUsers = {
 export type AjaxAction = 'everlum_cf_login' | 'everlum_cf_signup' | 'everlum_cf_forgot' | 'everlum_cf_save_plan' | 'everlum_cf_get_plan' | 'everlum_cf_save_prereg';
 
 function extractAjaxAction(postData: string): string {
-  const match = /(?:^|&)action=([^&]+)/.exec(postData || '');
-  return match?.[1] ? decodeURIComponent(match[1]) : '';
+  const urlEncodedMatch = /(?:^|&)action=([^&]+)/.exec(postData || '');
+  if (urlEncodedMatch?.[1]) {
+    return decodeURIComponent(urlEncodedMatch[1]);
+  }
+
+  const multipartMatch = /name="action"\r?\n\r?\n([^\r\n]+)/.exec(postData || '');
+  return multipartMatch?.[1] || '';
 }
 
 function getRequestPostData(response: import('@playwright/test').Response): string {
   const request = response.request();
   const postData = request.postData();
   return typeof postData === 'string' ? postData : '';
+}
+
+export function isAjaxActionResponse(response: import('@playwright/test').Response, action: AjaxAction): boolean {
+  const request = response.request();
+  return response.url().includes('admin-ajax.php')
+    && request.method() === 'POST'
+    && extractAjaxAction(getRequestPostData(response)) === action;
 }
 
 export function buildCalculatorUrl(extraParams: Record<string, string> = {}): string {
@@ -164,7 +176,7 @@ export async function fillSummaryBudget(page: Page, values: { income: number; ex
     await page.locator('input[name="bigGoalAmount"]').fill(String(values.bigPurchase.amount));
     await page.locator('select[name="bigGoalContributionType"]').selectOption(values.bigPurchase.contributionType || 'fixed');
     await page.locator('input[name="bigGoalContributionAmount"]').fill(String(values.bigPurchase.contributionAmount));
-    await page.locator('select[name="bigGoalContributionFrequency"]').selectOption(values.bigPurchase.contributionFrequency || 'monthly');
+    await page.locator('select[name="bigGoalFrequency"]').selectOption(values.bigPurchase.contributionFrequency || 'monthly');
   }
 }
 

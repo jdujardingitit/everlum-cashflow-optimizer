@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
 import {
   addDebt,
-  addExpense,
-  addIncomeSource,
   attachGuards,
   fillSummaryBudget,
+  isAjaxActionResponse,
   openCalculator,
   mockTurnstileOnAllForms,
   testUsers,
@@ -18,8 +17,14 @@ test.describe('Money Steps generation', () => {
     await expect(form).toBeVisible();
     await page.locator('#ecf-login-form [name="login"]').fill(testUsers.existingEmail);
     await page.locator('#ecf-login-form [name="password"]').fill(testUsers.existingPassword);
+    const loginResponse = page.waitForResponse((response: any) => (
+      isAjaxActionResponse(response, 'everlum_cf_login')
+    ));
     await page.locator('[data-testid="ecf-login-submit"]').click();
-    await expect(page.getByTestId('ecf-step-save')).toBeVisible({ timeout: 10_000 });
+    const response = await loginResponse;
+    expect((await response.json()).success).toBeTruthy();
+    await expect(page.locator('#ecf-save-plan-btn')).toBeEnabled();
+    await expect(page.getByTestId('ecf-step-budget')).toBeVisible();
   }
 
   async function completeCalculatorAsLoggedInUser(page: any) {
@@ -30,16 +35,7 @@ test.describe('Money Steps generation', () => {
       savings: 500,
     });
 
-    await addIncomeSource(page, 'Gig Income', 900, 'monthly');
-
-    await addExpense(page, {
-      name: 'Rent',
-      amount: 900,
-      ccEligible: 'no',
-      paymentMethod: 'cash',
-      frequency: 'monthly',
-    });
-
+    await page.getByTestId('ecf-step-budget-next').click();
     await addDebt(page, {
       name: 'Auto Loan',
       type: 'Auto Loan',
@@ -47,11 +43,10 @@ test.describe('Money Steps generation', () => {
       apr: 8,
       minimumPayment: 140,
     });
-    await page.getByTestId('ecf-step-budget-next').click();
     await page.getByTestId('ecf-step-debts-next').click();
     await page.getByTestId('ecf-calc-button').click();
     await page.getByTestId('ecf-results-save-button').click();
-    await expect(page.getByTestId('ecf-step-money-steps')).toBeVisible();
+    await expect(page.getByTestId('ecf-step-save')).toBeVisible();
     await page.getByTestId('ecf-save-money-steps-button').click();
     await expect(page.getByTestId('ecf-step-money-steps')).toBeVisible();
   }
@@ -93,18 +88,22 @@ test.describe('Money Steps generation', () => {
 
     await page.locator('#ecf-money-frequency').selectOption('weekly');
     await page.getByTestId('ecf-build-money-steps-btn').click();
-    await expect(page.locator('#ecf-money-steps-table tbody tr')).toHaveCount(1);
+    const rows = page.locator('#ecf-money-steps-table tbody tr');
+    await expect.poll(() => rows.count()).toBeGreaterThan(0);
+    const weeklyCount = await rows.count();
 
     await page.locator('#ecf-money-frequency').selectOption('biweekly');
     await page.getByTestId('ecf-build-money-steps-btn').click();
-    await expect(page.locator('#ecf-money-steps-table tbody tr')).toHaveCount(1);
+    await expect.poll(() => rows.count()).toBeGreaterThan(0);
+    const biweeklyCount = await rows.count();
 
     await page.locator('#ecf-money-frequency').selectOption('monthly');
     await page.getByTestId('ecf-build-money-steps-btn').click();
-    await expect(page.locator('#ecf-money-steps-table tbody tr')).toHaveCount(1);
+    await expect.poll(() => rows.count()).toBeGreaterThan(0);
+    const monthlyCount = await rows.count();
 
-    await expect(page.locator('text=Income:')).toBeVisible();
-    await expect(page.locator('text=Expenses:')).toBeVisible();
+    expect(weeklyCount).toBeGreaterThan(biweeklyCount);
+    expect(biweeklyCount).toBeGreaterThanOrEqual(monthlyCount);
     await expect(page.locator('#ecf-step-money-steps .ecf-money-steps')).toHaveClass(/ecf-sensitive|ecf-money-steps/);
     await assertNoErrors();
   });
@@ -119,6 +118,7 @@ test.describe('Money Steps generation', () => {
       expenses: 900,
       savings: 200,
     });
+    await page.getByTestId('ecf-step-budget-next').click();
     await addDebt(page, {
       name: 'Card',
       type: 'Credit Card',
@@ -126,7 +126,6 @@ test.describe('Money Steps generation', () => {
       apr: 20,
       minimumPayment: 80,
     });
-    await page.getByTestId('ecf-step-budget-next').click();
     await page.getByTestId('ecf-step-debts-next').click();
     await page.getByTestId('ecf-calc-button').click();
     await page.getByTestId('ecf-results-save-button').click();

@@ -1114,6 +1114,8 @@ final class Everlum_Cashflow_Optimizer {
         wp_send_json_success([
             'message' => 'Account created. You are now signed in.',
             'user_id' => $user_id,
+            'nonce' => wp_create_nonce('everlum_cf_frontend'),
+            'can_use_money_steps' => $this->can_use_money_steps((int) $user_id),
         ]);
     }
 
@@ -1140,6 +1142,8 @@ final class Everlum_Cashflow_Optimizer {
         wp_send_json_success([
             'message' => 'Signed in.',
             'user_id' => $user->ID,
+            'nonce' => wp_create_nonce('everlum_cf_frontend'),
+            'can_use_money_steps' => $this->can_use_money_steps((int) $user->ID),
         ]);
     }
 

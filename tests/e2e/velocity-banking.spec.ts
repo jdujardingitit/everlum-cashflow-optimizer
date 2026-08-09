@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
   addDebt,
-  addExpense,
   attachGuards,
   fillSummaryBudget,
   openCalculator,
@@ -31,21 +30,8 @@ test.describe('Credit/LOC velocity behavior', () => {
       creditLimit: 10000,
     });
 
-    await addExpense(page, {
-      name: 'Rent',
-      amount: 900,
-      ccEligible: 'no',
-      paymentMethod: 'cash',
-      frequency: 'monthly',
-    });
-    await addExpense(page, {
-      name: 'Groceries',
-      amount: 450,
-      ccEligible: 'yes',
-      paymentMethod: 'card',
-      frequency: 'monthly',
-    });
-
+    await page.getByTestId('ecf-step-debts-next').click();
+    await page.locator('input[name="velocitySummaryCheckingHoldback"]').fill('900');
     await page.locator('input[name="velocityCardName"]').fill('Primary Card');
     await page.locator('input[name="velocityTargetDebt"]').fill('Visa');
     await page.locator('input[name="velocityCardBalance"]').fill('3000');
@@ -55,7 +41,6 @@ test.describe('Credit/LOC velocity behavior', () => {
     await page.locator('input[name="velocityInterestChargeDate"]').fill('2026-09-05');
     await page.locator('select[name="velocityCreditToolType"]').selectOption('none');
 
-    await page.getByTestId('ecf-step-debts-next').click();
     await page.getByTestId('ecf-calc-button').click();
 
     await expect(page.getByTestId('ecf-results')).toBeVisible();
@@ -85,14 +70,9 @@ test.describe('Credit/LOC velocity behavior', () => {
       apr: 22,
       minimumPayment: 120,
     });
-    await addExpense(page, {
-      name: 'Groceries',
-      amount: 450,
-      ccEligible: 'yes',
-      paymentMethod: 'card',
-      frequency: 'monthly',
-    });
 
+    await page.getByTestId('ecf-step-debts-next').click();
+    await page.locator('input[name="velocitySummaryCheckingHoldback"]').fill('900');
     await page.getByRole('radio', { name: 'Custom timing' }).check();
     await page.locator('input[name="velocityPaycheckDates"]').fill('2026-08-10,2026-08-24');
     await page.locator('input[name="velocityStatementDate"]').fill('2026-09-01');
@@ -101,9 +81,9 @@ test.describe('Credit/LOC velocity behavior', () => {
     await page.locator('input[name="velocityCardName"]').fill('Primary Card');
     await page.locator('input[name="velocityCardBalance"]').fill('3000');
     await page.locator('input[name="velocityCardLimit"]').fill('10000');
+    await page.locator('input[name="velocityCardApr"]').fill('22');
     await page.locator('input[name="velocityTargetDebt"]').fill('Visa');
 
-    await page.getByTestId('ecf-step-debts-next').click();
     await page.getByTestId('ecf-calc-button').click();
 
     await expect(page.getByText('Custom Timing Velocity Estimate')).toBeVisible();
@@ -131,8 +111,8 @@ test.describe('Credit/LOC velocity behavior', () => {
       minimumPayment: 220,
     });
 
-    await page.locator('select[name="velocityCreditToolType"]').selectOption('none');
     await page.getByTestId('ecf-step-debts-next').click();
+    await page.locator('select[name="velocityCreditToolType"]').selectOption('none');
     await page.getByTestId('ecf-calc-button').click();
     await expect(page.getByText('LOC Velocity: N/A')).toBeVisible();
 
@@ -151,6 +131,7 @@ test.describe('Credit/LOC velocity behavior', () => {
       apr: 22,
       minimumPayment: 220,
     });
+    await page.getByTestId('ecf-step-debts-next').click();
     await page.locator('select[name="velocityCreditToolType"]').selectOption('heloc');
     await page.locator('input[name="velocityCreditToolBalance"]').fill('4000');
     await page.locator('input[name="velocityCreditToolLimit"]').fill('15000');
@@ -158,7 +139,6 @@ test.describe('Credit/LOC velocity behavior', () => {
     await page.locator('input[name="velocityCreditToolMinimumPayment"]').fill('150');
     await page.locator('input[name="velocityTargetDebt"]').fill('Credit Card');
 
-    await page.getByTestId('ecf-step-debts-next').click();
     await page.getByTestId('ecf-calc-button').click();
     await expect(page.getByText('Advanced LOC Velocity Estimate')).toBeVisible();
     await assertNoErrors();

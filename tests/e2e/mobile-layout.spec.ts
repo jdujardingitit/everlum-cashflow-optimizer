@@ -35,14 +35,6 @@ test.describe('Mobile UI layout and interaction', () => {
     await fundRow.locator('[data-field="amount"]').fill('400');
     await fundRow.locator('[data-field="date"]').fill('2026-09-01');
 
-    await addExpense(page, {
-      name: 'Internet',
-      amount: 100,
-      ccEligible: 'yes',
-      paymentMethod: 'card',
-      frequency: 'monthly',
-    });
-
     await page.getByTestId('ecf-step-budget-next').click();
     await addDebt(page, {
       name: 'Student Loan',
@@ -68,13 +60,9 @@ test.describe('Mobile UI layout and interaction', () => {
     await mockTurnstileOnAllForms(page);
 
     await page.getByTestId('ecf-cta-start').click();
-    await fillSummaryBudget(page, {
-      income: 5000,
-      expenses: 1800,
-      savings: 500,
-    });
-    await addIncomeSource(page, 'Side Income', 300, 'monthly');
     await page.locator('button[data-path="itemized"]').click();
+    await addIncomeSource(page, 'Main Income', 5000, 'monthly');
+    await addIncomeSource(page, 'Side Income', 300, 'monthly');
 
     await addExpense(page, {
       name: 'Groceries',

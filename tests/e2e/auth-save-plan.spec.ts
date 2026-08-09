@@ -3,9 +3,11 @@ import {
   addDebt,
   attachGuards,
   fillSummaryBudget,
+  isAjaxActionResponse,
   openCalculator,
   mockTurnstileOnAllForms,
   testUsers,
+  type AjaxAction,
 } from './utils';
 
 type AuthAction = 'login' | 'signup';
@@ -20,12 +22,11 @@ async function submitAuthForm(page: any, action: AuthAction): Promise<any> {
     },
   };
 
-  const actionName = action === 'login' ? 'everlum_cf_login' : 'everlum_cf_signup';
-  const responsePromise = page.waitForResponse((response: any) => {
-    const request = response.request();
-    const postData = request.postData() || '';
-    return request.url().includes('admin-ajax.php') && request.method() === 'POST' && postData.includes(`action=${actionName}`);
-  }, { timeout: 20_000 });
+  const actionName: AjaxAction = action === 'login' ? 'everlum_cf_login' : 'everlum_cf_signup';
+  const responsePromise = page.waitForResponse(
+    (response: any) => isAjaxActionResponse(response, actionName),
+    { timeout: 20_000 },
+  );
 
   await page.locator(selectors[action].submit).click();
   const response = await responsePromise;
@@ -64,11 +65,9 @@ async function seedCalculator(page: any): Promise<void> {
 }
 
 async function savePlanAsCurrentUser(page: any): Promise<number> {
-  const savePlanResponse = page.waitForResponse((response: any) => {
-    return response.url().includes('admin-ajax.php')
-      && response.request().method() === 'POST'
-      && (response.request().postData() || '').includes('action=everlum_cf_save_plan');
-  });
+  const savePlanResponse = page.waitForResponse((response: any) => (
+    isAjaxActionResponse(response, 'everlum_cf_save_plan')
+  ));
   await page.getByTestId('ecf-step-save').locator('#ecf-save-message');
   await page.locator('#ecf-save-plan-btn').click();
   const response = await savePlanResponse;
