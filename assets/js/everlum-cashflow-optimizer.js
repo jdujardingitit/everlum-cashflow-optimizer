@@ -1922,6 +1922,23 @@
         bindAuthForm(fieldNodes.preregForm, 'everlum_cf_save_prereg', 'prereg');
     }
 
+    function refreshAuthNonce() {
+        const data = new FormData();
+        data.append('action', 'everlum_cf_auth_nonce');
+
+        return fetch(cfg.ajaxUrl, {
+            method: 'POST',
+            body: data,
+            credentials: 'same-origin',
+        }).then((response) => response.json())
+            .then((result) => {
+                if (!result || !result.success || !result.data?.nonce) {
+                    throw new Error(result?.data?.message || 'Could not refresh the signed-in session.');
+                }
+                cfg.nonce = result.data.nonce;
+            });
+    }
+
     function getAuthReturnSourceFromStep(index) {
         if (index === 4) {
             return 'save';
@@ -2041,11 +2058,10 @@
                         if (Object.prototype.hasOwnProperty.call(result.data, 'can_use_money_steps')) {
                             cfg.canUseMoneySteps = Boolean(result.data.can_use_money_steps);
                         }
-                        if (result.data.nonce) {
-                            cfg.nonce = result.data.nonce;
-                        }
-                        configureSaveButton();
-                        goToStep(getAuthReturnStep());
+                        return refreshAuthNonce().then(() => {
+                            configureSaveButton();
+                            goToStep(getAuthReturnStep());
+                        });
                     } else {
                         const explicitEvent = form.getAttribute('data-clarity-event') || (action === 'everlum_cf_save_prereg' ? 'prereg_submitted' : null);
                         if (explicitEvent) {

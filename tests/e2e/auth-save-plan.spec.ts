@@ -27,9 +27,16 @@ async function submitAuthForm(page: any, action: AuthAction): Promise<any> {
     (response: any) => isAjaxActionResponse(response, actionName),
     { timeout: 20_000 },
   );
+  const nonceResponsePromise = page.waitForResponse(
+    (response: any) => isAjaxActionResponse(response, 'everlum_cf_auth_nonce'),
+    { timeout: 20_000 },
+  );
 
   await page.locator(selectors[action].submit).click();
   const response = await responsePromise;
+  const nonceResponse = await nonceResponsePromise;
+  expect(nonceResponse.ok()).toBeTruthy();
+  expect((await nonceResponse.json())?.success).toBeTruthy();
   return response.json();
 }
 

@@ -20,7 +20,7 @@ export const testUsers = {
   secondPassword: process.env.ECF_TEST_USER_PASSWORD_ALT || '',
 };
 
-export type AjaxAction = 'everlum_cf_login' | 'everlum_cf_signup' | 'everlum_cf_forgot' | 'everlum_cf_save_plan' | 'everlum_cf_get_plan' | 'everlum_cf_save_prereg';
+export type AjaxAction = 'everlum_cf_login' | 'everlum_cf_signup' | 'everlum_cf_auth_nonce' | 'everlum_cf_forgot' | 'everlum_cf_save_plan' | 'everlum_cf_get_plan' | 'everlum_cf_save_prereg';
 
 function extractAjaxAction(postData: string): string {
   const urlEncodedMatch = /(?:^|&)action=([^&]+)/.exec(postData || '');

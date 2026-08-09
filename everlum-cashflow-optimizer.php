@@ -52,6 +52,7 @@ final class Everlum_Cashflow_Optimizer {
         add_action('wp_ajax_nopriv_everlum_cf_signup', [$this, 'ajax_signup']);
         add_action('wp_ajax_everlum_cf_login', [$this, 'ajax_login']);
         add_action('wp_ajax_nopriv_everlum_cf_login', [$this, 'ajax_login']);
+        add_action('wp_ajax_everlum_cf_auth_nonce', [$this, 'ajax_auth_nonce']);
         add_action('wp_ajax_everlum_cf_forgot', [$this, 'ajax_forgot']);
         add_action('wp_ajax_nopriv_everlum_cf_forgot', [$this, 'ajax_forgot']);
     }
@@ -1118,8 +1119,17 @@ final class Everlum_Cashflow_Optimizer {
         wp_send_json_success([
             'message' => 'Account created. You are now signed in.',
             'user_id' => $user_id,
-            'nonce' => wp_create_nonce('everlum_cf_frontend'),
             'can_use_money_steps' => $this->can_use_money_steps((int) $user_id),
+        ]);
+    }
+
+    public function ajax_auth_nonce(): void {
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => 'Authentication required.'], 401);
+        }
+
+        wp_send_json_success([
+            'nonce' => wp_create_nonce('everlum_cf_frontend'),
         ]);
     }
 
@@ -1147,7 +1157,6 @@ final class Everlum_Cashflow_Optimizer {
         wp_send_json_success([
             'message' => 'Signed in.',
             'user_id' => $user->ID,
-            'nonce' => wp_create_nonce('everlum_cf_frontend'),
             'can_use_money_steps' => $this->can_use_money_steps((int) $user->ID),
         ]);
     }
