@@ -233,8 +233,8 @@ test.describe('Auth return path validation', () => {
     await openCalculator(secondPage);
     await mockTurnstileOnAllForms(secondPage);
 
-    await secondPage.locator('[name="login"]').fill(testUsers.secondEmail);
-    await secondPage.locator('[name="password"]').fill(testUsers.secondPassword);
+    await secondPage.locator('#ecf-login-form [name="login"]').fill(testUsers.secondEmail);
+    await secondPage.locator('#ecf-login-form [name="password"]').fill(testUsers.secondPassword);
     await submitAuthForm(secondPage, 'login');
 
     const payload = await fetchPlanAsCurrentUser(secondPage, planId);
