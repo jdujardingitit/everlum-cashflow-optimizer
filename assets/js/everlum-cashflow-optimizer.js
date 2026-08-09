@@ -1778,7 +1778,7 @@
 
     function renderMoneySteps() {
         if (!cfg.canUseMoneySteps) {
-            fieldNodes.moneyStepsWrapper.innerHTML = `<p>${cfg.canUseMoneySteps === false ? 'Create a free account to use Money Steps.' : ''}</p>`;
+            fieldNodes.moneyStepsWrapper.innerHTML = '<p>Create a free account to use Money Steps.</p>';
             return;
         }
 

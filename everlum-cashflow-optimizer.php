@@ -1102,7 +1102,7 @@ final class Everlum_Cashflow_Optimizer {
         );
 
         wp_set_password($password, $user_id);
-        wp_signon(
+        $signed_in_user = wp_signon(
             [
                 'user_login' => $email,
                 'user_password' => $password,
@@ -1110,6 +1110,10 @@ final class Everlum_Cashflow_Optimizer {
             ],
             is_ssl()
         );
+        if (is_wp_error($signed_in_user)) {
+            wp_send_json_error(['message' => $signed_in_user->get_error_message()]);
+        }
+        wp_set_current_user((int) $signed_in_user->ID);
 
         wp_send_json_success([
             'message' => 'Account created. You are now signed in.',
@@ -1138,6 +1142,7 @@ final class Everlum_Cashflow_Optimizer {
         if (is_wp_error($user)) {
             wp_send_json_error(['message' => $user->get_error_message()]);
         }
+        wp_set_current_user((int) $user->ID);
 
         wp_send_json_success([
             'message' => 'Signed in.',

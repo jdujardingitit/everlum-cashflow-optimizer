@@ -142,7 +142,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          wp --allow-root --path="${{ steps.bootstrap.outputs.wp_path }}" server --host=127.0.0.1 --port=8080 > "${RUNNER_TEMP}/wp-server.log" 2>&1 &
+          PHP_CLI_SERVER_WORKERS=4 wp --allow-root --path="${{ steps.bootstrap.outputs.wp_path }}" server --host=127.0.0.1 --port=8080 > "${RUNNER_TEMP}/wp-server.log" 2>&1 &
           echo $! > "${RUNNER_TEMP}/wp-server.pid"
 
           for i in {1..60}; do
