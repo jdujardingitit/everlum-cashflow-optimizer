@@ -76,7 +76,6 @@ jobs:
           wp core download \
             --path="${WP_PATH}" \
             --version=6.5.5 \
-            --skip-content \
             --force \
             --allow-root
 
@@ -87,6 +86,10 @@ jobs:
             --dbpass="${WP_DB_PASSWORD}" \
             --dbhost="${WP_DB_HOST}" \
             --skip-check \
+            --allow-root
+
+          wp config set WP_ENVIRONMENT_TYPE local \
+            --path="${WP_PATH}" \
             --allow-root
 
           wp core install \
@@ -112,15 +115,13 @@ jobs:
             --user_pass="${TEST_USER_PASSWORD}" \
             --role=subscriber \
             --path="${WP_PATH}" \
-            --allow-root \
-            --skip-email || true
+            --allow-root
 
           wp user create "${TEST_USER_NAME// /_}_alt" "${TEST_USER_EMAIL_ALT}" \
             --user_pass="${TEST_USER_PASSWORD_ALT}" \
             --role=subscriber \
             --path="${WP_PATH}" \
-            --allow-root \
-            --skip-email || true
+            --allow-root
 
           wp post create \
             --path="${WP_PATH}" \
@@ -187,4 +188,4 @@ jobs:
           path: |
             playwright-report
             test-results
-            ${RUNNER_TEMP}/wp-server.log
+            ${{ runner.temp }}/wp-server.log
