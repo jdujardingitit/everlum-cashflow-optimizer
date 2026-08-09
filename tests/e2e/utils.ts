@@ -8,6 +8,7 @@ export const CALCULATOR_URL = process.env.ECF_CALC_URL
 export const CALCULATOR_PATH = process.env.ECF_CALC_PATH || '/';
 const turnstileMock = process.env.ECF_E2E_TURNSTILE_MOCK !== '0';
 const disableClarity = true;
+let buildUrlLogged = false;
 
 export const testUsers = {
   existingEmail: process.env.ECF_TEST_USER_EMAIL || '',
@@ -33,7 +34,11 @@ function getRequestPostData(response: import('@playwright/test').Response): stri
 }
 
 export function buildCalculatorUrl(extraParams: Record<string, string> = {}): string {
-  const base = new URL(CALCULATOR_PATH, CALCULATOR_URL.endsWith('/') ? CALCULATOR_URL : `${CALCULATOR_URL}/`);
+  const hasCustomPath = CALCULATOR_PATH.trim() !== '/' && Boolean(process.env.ECF_CALC_PATH);
+  const normalizedCalcUrl = CALCULATOR_URL.endsWith('/') ? CALCULATOR_URL : `${CALCULATOR_URL}/`;
+  const base = hasCustomPath
+    ? new URL(CALCULATOR_PATH, normalizedCalcUrl)
+    : new URL(normalizedCalcUrl);
   const params = new URLSearchParams(base.search);
   params.set('ecf_e2e', '1');
 
@@ -51,7 +56,21 @@ export function buildCalculatorUrl(extraParams: Record<string, string> = {}): st
 
   const next = new URL(base.toString());
   next.search = params.toString();
-  return next.toString();
+  const builtUrl = next.toString();
+  const expectedPathBase = new URL(normalizedCalcUrl).pathname;
+  const resolvedPath = new URL(builtUrl).pathname;
+  if (expectedPathBase !== '/' && resolvedPath !== expectedPathBase && process.env.ECF_E2E_DEBUG_URL === '1') {
+    throw new Error(`buildCalculatorUrl changed path unexpectedly: expected ${expectedPathBase}, got ${resolvedPath}`);
+  }
+  if (process.env.ECF_E2E_DEBUG_URL === '1' && !buildUrlLogged) {
+    buildUrlLogged = true;
+    console.log(`[e2e] buildCalculatorUrl => ${builtUrl}`);
+  }
+  if (!buildUrlLogged) {
+    buildUrlLogged = true;
+    console.log(`[e2e] buildCalculatorUrl => ${builtUrl}`);
+  }
+  return builtUrl;
 }
 
 export async function openCalculator(page: Page, extraParams: Record<string, string> = {}): Promise<void> {
