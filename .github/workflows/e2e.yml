@@ -92,6 +92,16 @@ jobs:
             --path="${WP_PATH}" \
             --allow-root
 
+          wp config set DISABLE_WP_CRON true --raw \
+            --path="${WP_PATH}" \
+            --allow-root
+          wp config set AUTOMATIC_UPDATER_DISABLED true --raw \
+            --path="${WP_PATH}" \
+            --allow-root
+          wp config set WP_AUTO_UPDATE_CORE false --raw \
+            --path="${WP_PATH}" \
+            --allow-root
+
           wp core install \
             --path="${WP_PATH}" \
             --url="${WP_URL}" \
