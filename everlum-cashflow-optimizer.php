@@ -1080,7 +1080,8 @@ final class Everlum_Cashflow_Optimizer {
             wp_send_json_error(['message' => 'Passwords do not match.']);
         }
 
-        $username = sanitize_user(strtolower(preg_replace('/[^A-Za-z0-9]/', '', explode('@', $email)[0]), true);
+        $email_parts = explode('@', $email);
+        $username = sanitize_user(strtolower(preg_replace('/[^A-Za-z0-9]/', '', $email_parts[0])), true);
         if (empty($username)) {
             $username = 'everlum_user';
         }

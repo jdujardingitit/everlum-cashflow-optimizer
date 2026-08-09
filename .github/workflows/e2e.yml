@@ -61,6 +61,9 @@ jobs:
           php-version: '8.2'
           tools: wp-cli
 
+      - name: Lint plugin PHP syntax
+        run: php -l everlum-cashflow-optimizer.php
+
       - name: Bootstrap WordPress sandbox
         id: bootstrap
         shell: bash
