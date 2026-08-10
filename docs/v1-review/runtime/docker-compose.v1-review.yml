@@ -1,0 +1,62 @@
+name: ecf-wordpress-v1-review
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: $MYSQL_DATABASE
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  wordpress:
+    image: wordpress:6.5.5-php8.2-apache
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: $MYSQL_DATABASE
+      WORDPRESS_DB_USER: $MYSQL_USER
+      WORDPRESS_DB_PASSWORD: $MYSQL_PASSWORD
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_ENVIRONMENT_TYPE', 'local');
+        define('DISABLE_WP_CRON', true);
+        define('AUTOMATIC_UPDATER_DISABLED', true);
+        define('WP_AUTO_UPDATE_CORE', false);
+    ports:
+      - "127.0.0.1:9400:80"
+    volumes:
+      - wp_data:/var/www/html
+      - ./plugin:/var/www/html/wp-content/plugins/everlum-cashflow-optimizer:ro
+      - ./mu-plugins/ecf-v1-review-banner.php:/var/www/html/wp-content/mu-plugins/ecf-v1-review-banner.php:ro
+
+  cli:
+    image: wordpress:cli-php8.2
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: $MYSQL_DATABASE
+      WORDPRESS_DB_USER: $MYSQL_USER
+      WORDPRESS_DB_PASSWORD: $MYSQL_PASSWORD
+    volumes:
+      - wp_data:/var/www/html
+      - ./plugin:/var/www/html/wp-content/plugins/everlum-cashflow-optimizer:ro
+      - ./mu-plugins/ecf-v1-review-banner.php:/var/www/html/wp-content/mu-plugins/ecf-v1-review-banner.php:ro
+      - ./seed:/review:ro
+    working_dir: /var/www/html
+
+volumes:
+  db_data:
+  wp_data:
